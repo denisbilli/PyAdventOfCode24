@@ -124,15 +124,51 @@ def follow_path(grid, current_pos, initial_pos, solutions):
 
         # Verifica che la posizione successiva sia valida
         if is_position_inside(grid, next_pos):
-            next_element = int(grid[next_pos[0]][next_pos[1]])
-            if next_element == element + 1:
-                # Segui il percorso ricorsivamente
-                follow_path(grid, next_pos, initial_pos, solutions)
+            next_element = grid[next_pos[0]][next_pos[1]]
+            if next_element != '.':
+                next_element = int(next_element)
+                if next_element == element + 1:
+                    # Segui il percorso ricorsivamente
+                    follow_path(grid, next_pos, initial_pos, solutions)
 
     return solutions
 
 
-file_path = f"./inputs/10/test2.txt"
+def follow_path_with_trails(grid, current_pos, initial_pos, solutions):
+    element = int(grid[current_pos[0]][current_pos[1]])
+
+    # Se troviamo il valore 9, il percorso è completo
+    if element == 9:
+        #print(f"> found solution starting at {initial_pos} and ending at {current_pos}")
+        solution = {"start": initial_pos[0], "trails": initial_pos[1:], "end": current_pos}
+        if not solutions.__contains__(solution):
+            return solutions.append(solution)
+
+    # Direzioni di movimento (sx, su, dx, giu)
+    directions = [
+        (0, -1),  # sinistra
+        (-1, 0),  # su
+        (0, 1),  # destra
+        (1, 0)  # giù
+    ]
+
+    for dr, dc in directions:
+        next_pos = (current_pos[0] + dr, current_pos[1] + dc)
+
+        # Verifica che la posizione successiva sia valida
+        if is_position_inside(grid, next_pos):
+            next_element = grid[next_pos[0]][next_pos[1]]
+            if next_element != '.':
+                next_element = int(next_element)
+                if next_element == element + 1:
+                    initial_pos.append(next_pos)
+                    # Segui il percorso ricorsivamente
+                    follow_path_with_trails(grid, next_pos, initial_pos, solutions)
+
+    return solutions
+
+
+file_path = f"./inputs/10/input.txt"
 file_content = read_file_to_string(file_path)
 
 grid = string_to_matrix(file_content)
@@ -169,8 +205,15 @@ print(f"final solution: {count}\n")
 
 print("-----------------------------\nPART 2")
 
+starting_positions = find_char_in_grid(grid, ['0'])
+
+print(f"\nstarting_positions: {starting_positions}")
+
+solutions = []
+for starting_pos in starting_positions:
+    follow_path_with_trails(grid, starting_pos, [starting_pos], solutions)
+
 
 print(f"\nSOLUTION --------------------\n")
 
-
-print(f"solution: \n")
+print(f"solution: {len(solutions)}\n")
