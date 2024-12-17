@@ -154,168 +154,36 @@ print(f"\nSOLUTION --------------------\n")
 print("-----------------------------\nPART 2")
 
 
-# def find_combination_binary(goal, step_a, step_b):
-#     """
-#     Trova tutte le combinazioni valide di passi A e B per raggiungere il goal.
-#
-#     Args:
-#         goal (int): Valore del goal.
-#         step_a (int): Incremento dato dal pulsante A.
-#         step_b (int): Incremento dato dal pulsante B.
-#
-#     Returns:
-#         list: Lista di tuple (passi_a, passi_b) che soddisfano l'equazione.
-#     """
-#     results = []
-#
-#     def binary_search(low, high):
-#         """
-#         Ricerca binaria dicotomica per trovare tutte le soluzioni valide.
-#         """
-#         if low > high:
-#             return  # Spazio di ricerca terminato
-#
-#         mid = (low + high) // 2  # Punto centrale dell'intervallo
-#         resto = goal - (mid * step_a)
-#
-#         # Controlla se la soluzione è valida
-#         if resto % step_b == 0:
-#             passi_b = resto // step_b
-#             if passi_b >= 0:  # Validazione
-#                 results.append((mid, passi_b))  # Aggiungi la soluzione corrente
-#
-#         # Continua a cercare a sinistra e a destra
-#         binary_search(low, mid - 1)  # Cerca nella metà sinistra
-#         binary_search(mid + 1, high)  # Cerca nella metà destra
-#
-#     # Calcola il massimo possibile di passi_a
-#     max_a = goal // step_a
-#     binary_search(0, max_a)
-#
-#     return results
-#
-#
-# def find_steps_to_goal_binary(prize, a_val, b_val):
-#     """
-#     Trova tutte le combinazioni di passi A e B per raggiungere il goal in X e Y.
-#     Testa sia partendo con A che con B.
-#
-#     Args:
-#         prize (tuple): Coordinata (X, Y) del goal.
-#         a_val (tuple): Valori di incremento (X, Y) per il pulsante A.
-#         b_val (tuple): Valori di incremento (X, Y) per il pulsante B.
-#
-#     Returns:
-#         dict: Dizionario con tutte le combinazioni trovate.
-#     """
-#     goal_x, goal_y = prize
-#     step_a_x, step_a_y = a_val
-#     step_b_x, step_b_y = b_val
-#
-#     bigger_step_x = step_a_x if step_a_x > step_b_x else step_b_x
-#     lower_step_x = step_b_x if step_a_x > step_b_x else step_a_x
-#     inverted_a_b = False if step_a_x > step_b_x else True
-#
-#     # Trova combinazioni per X e Y
-#     solutions = find_combination_binary(goal_x, bigger_step_x, lower_step_x)
-#
-#     # Filtra solo soluzioni valide
-#     valid_solutions = []
-#     for x_a, x_b in solutions:
-#         real_x_a = x_a if not inverted_a_b else x_b
-#         real_x_b = x_b if not inverted_a_b else x_a
-#
-#         if (real_x_a * step_a_x + real_x_b * step_b_x == goal_x) and (real_x_a * step_a_y + real_x_b * step_b_y == goal_y):
-#             valid_solutions.append({
-#                 "steps": {"A": real_x_a, "B": real_x_b},
-#                 "cost": real_x_a * 3 + real_x_b * 1
-#             })
-#     return valid_solutions
-
-
-def find_previous_multiple(A, B):
+def solve_linear_equations(a1, b1, c1, a2, b2, c2):
     """
-    Trova il primo numero C precedente o uguale ad A che è multiplo di B.
+    Risolve un sistema di due equazioni lineari a due incognite:
+        a1*X + b1*Y = c1
+        a2*X + b2*Y = c2
 
     Args:
-        A (int): Il numero di partenza.
-        B (int): Il numero di cui si cerca il multiplo.
+        a1, b1, c1: Coefficienti della prima equazione.
+        a2, b2, c2: Coefficienti della seconda equazione.
 
     Returns:
-        int: Il primo multiplo di B precedente o uguale ad A.
+        tuple: Soluzioni (X, Y) se esistono, altrimenti None.
     """
-    if B == 0:
-        raise ValueError("B non può essere zero.")
+    # Determinante del sistema
+    determinant = (a1 * b2) - (a2 * b1)
 
-    # Calcolo efficiente del primo multiplo di B <= A
-    C = (A // B) * B
-    return C
+    if determinant == 0:
+        # Il sistema non ha soluzioni uniche (linee parallele o coincidenti)
+        return None
 
+    # Calcolo delle soluzioni
+    X = (c1 * b2 - c2 * b1) / determinant
+    Y = (a1 * c2 - a2 * c1) / determinant
 
+    print(f"det: {determinant} X: {X} Y: {Y}")
 
-def find_combination_binary(goal, step_a, step_b):
-    """
-    Genera tutte le combinazioni valide di passi A e B per raggiungere il goal.
-
-    Args:
-        goal (int): Valore del goal.
-        step_a (int): Incremento dato dal pulsante A.
-        step_b (int): Incremento dato dal pulsante B.
-
-    Yields:
-        tuple: (passi_a, passi_b) che soddisfano l'equazione.
-    """
-    def binary_search(low, high):
-        if low > high:
-            return
-
-        mid = (low + high) // 2
-        resto = goal - (mid * step_a)
-
-        if resto % step_b == 0:
-            passi_b = resto // step_b
-            if passi_b >= 0:  # Soluzione valida
-                yield mid, passi_b
-
-        yield from binary_search(low, mid - 1)
-        yield from binary_search(mid + 1, high)
-
-    max_a = goal // step_a
-    yield from binary_search(0, max_a)
+    return X, Y
 
 
-def find_steps_to_goal_binary(prize, a_val, b_val):
-    """
-    Genera tutte le combinazioni valide per raggiungere il goal in X e Y.
-
-    Args:
-        prize (tuple): Coordinata (X, Y) del goal.
-        a_val (tuple): Valori di incremento (X, Y) per il pulsante A.
-        b_val (tuple): Valori di incremento (X, Y) per il pulsante B.
-
-    Yields:
-        dict: Soluzioni valide con passi e costo.
-    """
-    goal_x, goal_y = prize
-    step_a_x, step_a_y = a_val
-    step_b_x, step_b_y = b_val
-
-    for x_a, x_b in find_combination_binary(goal_x, step_a_x, step_b_x):
-        # Verifica se soddisfa anche Y
-        y_a, y_b = x_a, x_b
-        if (y_a * step_a_y + y_b * step_b_y == goal_y):
-            cost = x_a * 3 + x_b
-            yield {
-                "steps": {"A": x_a, "B": x_b},
-                "cost": cost
-            }
-
-
-
-A_TOKEN = 3
-B_TOKEN = 1
-
-file_path = f"./inputs/13/test.txt"
+file_path = f"./inputs/13/input.txt"
 file_content = read_file_to_string(file_path)
 
 machines = parse_input(file_content)
@@ -328,30 +196,29 @@ for machine in machines:
     print(f"\n **** NEW MACHINE **** \n")
     print(f"Goal: {machine['Prize']}, A: {machine['A']}, B: {machine['B']}")
 
-    solutions = find_steps_to_goal_binary(machine["Prize"], machine["A"], machine["B"])
-    min_cost = float('inf')
-    best_solution = None
+    a1, a2 = machine["A"]  # Incrementi in X e Y per il pulsante A
+    b1, b2 = machine["B"]  # Incrementi in X e Y per il pulsante B
+    c1, c2 = machine["Prize"]  # Goal in X e Y
+    c1 += 10000000000000
+    c2 += 10000000000000
 
-    for solution in solutions:
-        x_steps_a = solution["steps"]["A"]
-        x_steps_b = solution["steps"]["B"]
-        cost = solution["cost"]
+    print(a1, b1, c1)  # Coefficienti per l'equazione X
+    print(a2, b2, c2)  # Coefficienti per l'equazione Y
 
-        print(f"  -> Solution: {x_steps_a} steps A, {x_steps_b} steps B")
-        print(f"  -> Total Cost: {cost}")
+    solutions = solve_linear_equations(a1, b1, c1, a2, b2, c2)
 
-        if cost < min_cost:
-            min_cost = cost
-            best_solution = solution
-
-    if best_solution:
-        total_cost += best_solution['cost']
-        print("\nBest Solution:")
-        print(f"  -> Solution: {best_solution['steps']['A']} steps A, {best_solution['steps']['B']} steps B")
-        print(f"  -> Minimum Cost: {min_cost}")
-
-print(f"\nFinal Total Cost: {total_cost}")
-
+    # Controllo che X e Y siano interi
+    if solutions:
+        X, Y = solutions
+        if X.is_integer() and Y.is_integer():  # Verifica che X e Y siano interi
+            X, Y = int(X), int(Y)  # Converti a interi
+            cost = X*3 + Y*1
+            total_cost += cost
+            print(f"Soluzioni: X = {X}, Y = {Y} @ cost = {cost}")
+        else:
+            print("Le soluzioni trovate non sono intere.")
+    else:
+        print("Il sistema non ha soluzioni uniche.")
 
 print(f"\nSOLUTION --------------------\n")
 
