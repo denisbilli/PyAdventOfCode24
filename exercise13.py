@@ -61,138 +61,144 @@ def parse_input(input_string):
 print("-----------------------------\nPART 1")
 
 
-# def follow_path_with_trails(current_pos, initial_pos, solutions, machine_data, n_steps, a_steps, b_steps):
-#     goal = machine_data["Prize"]
-#     a_val = machine_data["A"]
-#     b_val = machine_data["B"]
-#
-#     if n_steps == 100 and current_pos != goal:
-#         return solutions
-#     elif n_steps <= 100 and current_pos == goal:
-#         print(f" > found solution starting at {initial_pos} and ending at {current_pos}")
-#         solution = {"start": initial_pos[0], "trails": initial_pos[1:], "end": current_pos, "A_steps": a_steps, "B_steps": b_steps}
-#         if not solutions.__contains__(solution):
-#             return solutions.append(solution)
-#
-#     directions = [
-#         (a_val[0], a_val[1]),  # A
-#         (b_val[0], b_val[1]),  # B
-#     ]
-#
-#     for dr, dc in directions:
-#         next_pos = (current_pos[0] + dr, current_pos[1] + dc)
-#         if next_pos[0] > goal[0] or next_pos[1] > goal[1]:
-#             continue
-#         a_steps = a_steps + 1 if dc == a_val[1] else a_steps
-#         b_steps = b_steps + 1 if dc == b_val[1] else b_steps
-#
-#         print(f"> next position {current_pos} => {next_pos}")
-#
-#         initial_pos.append(next_pos)
-#         follow_path_with_trails(next_pos, initial_pos, solutions, goal, n_steps+1, a_val, b_val, a_steps, b_steps)
-#
-#     return solutions
-
-
-def follow_path_with_trails(current_pos, initial_pos, solutions, machine_data, n_steps, a_steps, b_steps, visited=None):
+def find_steps_to_goal(prize, a_val, b_val):
     """
-    Trova il percorso per raggiungere il goal (Prize) seguendo i percorsi A e B.
+    Trova tutte le combinazioni di passi A e B per raggiungere il goal in X e Y.
+    Testa sia partendo con A che con B.
 
     Args:
-        current_pos (tuple): Posizione corrente (X, Y).
-        initial_pos (list): Lista delle posizioni visitate.
-        solutions (list): Lista di soluzioni trovate.
-        machine_data (dict): Dati della macchina con Prize, A, B.
-        n_steps (int): Numero di passi effettuati.
-        a_steps (int): Numero di passi fatti lungo il percorso A.
-        b_steps (int): Numero di passi fatti lungo il percorso B.
+        prize (tuple): Coordinata (X, Y) del goal.
+        a_val (tuple): Valori di incremento (X, Y) per il pulsante A.
+        b_val (tuple): Valori di incremento (X, Y) per il pulsante B.
 
     Returns:
-        list: Lista delle soluzioni trovate.
+        dict: Dizionario con tutte le combinazioni trovate.
     """
-    if visited is None:
-        visited = set()
+    def find_combination(goal, step_a, step_b):
+        max_a = goal // step_a
+        results = []
+        for passi_a in range(max_a, -1, -1):  # Partiamo da max_a e scendiamo
+            resto = goal - (passi_a * step_a)
+            if resto % step_b == 0:
+                passi_b = resto // step_b
+                results.append((passi_a, passi_b))
+        return results
 
-    goal = machine_data["Prize"]
-    a_val = machine_data["A"]
-    b_val = machine_data["B"]
+    goal_x, goal_y = prize
+    step_a_x, step_a_y = a_val
+    step_b_x, step_b_y = b_val
 
-    print(f"Current position: {current_pos}")
+    # Trova combinazioni per X e Y
+    solutions = find_combination(goal_x, step_a_x, step_b_x)
+    # solutions_y = find_combination(goal_y, step_a_y, step_b_y)
 
-    # Condizioni di uscita
-    if n_steps == 100 and current_pos != goal:
-        return solutions
-    elif current_pos == goal:
-        print(f"> Found solution starting at {initial_pos[0]} and ending at {current_pos}")
-        solution = {
-            "start": initial_pos[0],
-            "trails": initial_pos[1:],  # Percorso completo
-            "end": current_pos,
-            "A_steps": a_steps,
-            "B_steps": b_steps,
-        }
-        if solution not in solutions:
-            solutions.append(solution)
-        return solutions
-
-    # Verifica se il percorso è già stato visitato
-    state = (current_pos, a_steps, b_steps)
-    if state in visited:
-        print(f"!! Already visited {state}!!")
-        return solutions
-    visited.add(state)
-
-    # Direzioni da esplorare
-    directions = [
-        (a_val[0], a_val[1], "A"),
-        (b_val[0], b_val[1], "B"),
-    ]
-
-    for dr, dc, path_type in directions:
-        next_pos = (current_pos[0] + dr, current_pos[1] + dc)
-
-        # Ignora posizioni che superano il goal
-        if next_pos[0] > goal[0] or next_pos[1] > goal[1]:
-            continue
-
-        # Aggiorna i passi A e B
-        new_a_steps = a_steps + 1 if path_type == "A" else a_steps
-        new_b_steps = b_steps + 1 if path_type == "B" else b_steps
-
-        print(f"> Following path {path_type}: {current_pos} => {next_pos}")
-
-        # Crea una nuova lista per evitare modifiche indesiderate
-        new_initial_pos = initial_pos + [next_pos]
-
-        # Chiamata ricorsiva
-        follow_path_with_trails(next_pos, new_initial_pos, solutions, machine_data, n_steps + 1, new_a_steps, new_b_steps, visited)
-
-    return solutions
+    # Filtra solo soluzioni valide
+    valid_solutions = []
+    for x_a, x_b in solutions:
+        if (x_a * step_a_x + x_b * step_b_x == goal_x) and (x_a * step_a_y + x_b * step_b_y == goal_y):
+            valid_solutions.append({
+                "steps": {"A": x_a, "B": x_b},
+                "cost": x_a * 3 + x_b * 1 # Calcola il costo totale
+            })
+    return valid_solutions
 
 
 A_TOKEN = 3
 B_TOKEN = 1
 
-file_path = f"./inputs/13/test.txt"
+file_path = f"./inputs/13/input.txt"
 file_content = read_file_to_string(file_path)
 
 machines = parse_input(file_content)
 
-print(machines)
+print(f"machines: {machines}")
 
-solutions = []
+total_cost = 0
+
 for machine in machines:
-    starting_pos = (0, 0)
-    follow_path_with_trails(starting_pos, [starting_pos], solutions, machine, 0, 0, 0)
+    print(f"\n **** NEW MACHINE **** \n")
+    solutions = find_steps_to_goal(machine["Prize"], machine["A"], machine["B"])
 
-print(solutions)
+    if not solutions:
+        print("No valid solutions found!")
+        continue
+
+    print("Valid solutions:")
+    min_cost = float('inf')
+    best_solution = None
+
+    for solution in solutions:
+        x_steps_a = solution["steps"]["A"]
+        x_steps_b = solution["steps"]["B"]
+        cost = solution["cost"]
+
+        print(f"  -> Solution: {x_steps_a} steps A, {x_steps_b} steps B")
+        print(f"  -> Total Cost: {cost}")
+
+        if cost < min_cost:
+            min_cost = cost
+            best_solution = solution
+
+    if best_solution:
+        total_cost += best_solution['cost']
+
+        # Stampa la soluzione con il costo minimo
+        print("\nBest Solution:")
+        print(f"  -> Solution: {best_solution['steps']['A']} steps A, {best_solution['steps']['B']} steps B")
+        print(f"  -> Total Cost: {best_solution['cost']}")
 
 print(f"\nSOLUTION --------------------\n")
 
-print(f"solution:\n")
+print(f"solution: {total_cost}\n")
 
 print("-----------------------------\nPART 2")
 
+
+A_TOKEN = 3
+B_TOKEN = 1
+
+file_path = f"./inputs/13/test2.txt"
+file_content = read_file_to_string(file_path)
+
+machines = parse_input(file_content)
+
+print(f"machines: {machines}")
+
+total_cost = 0
+
+for machine in machines:
+    print(f"\n **** NEW MACHINE **** \n")
+    solutions = find_steps_to_goal(machine["Prize"], machine["A"], machine["B"])
+
+    if not solutions:
+        print("No valid solutions found!")
+        continue
+
+    print("Valid solutions:")
+    min_cost = float('inf')
+    best_solution = None
+
+    for solution in solutions:
+        x_steps_a = solution["steps"]["A"]
+        x_steps_b = solution["steps"]["B"]
+        cost = solution["cost"]
+
+        print(f"  -> Solution: {x_steps_a} steps A, {x_steps_b} steps B")
+        print(f"  -> Total Cost: {cost}")
+
+        if cost < min_cost:
+            min_cost = cost
+            best_solution = solution
+
+    if best_solution:
+        total_cost += best_solution['cost']
+
+        # Stampa la soluzione con il costo minimo
+        print("\nBest Solution:")
+        print(f"  -> Solution: {best_solution['steps']['A']} steps A, {best_solution['steps']['B']} steps B")
+        print(f"  -> Total Cost: {best_solution['cost']}")
+
+
 print(f"\nSOLUTION --------------------\n")
 
-print(f"solution:\n")
+print(f"solution: {total_cost}\n")
