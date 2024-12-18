@@ -1,8 +1,10 @@
+import os
 
 from file_utils import *
 from matrix_utils import *
 from string_utils import *
 import re
+from time import sleep
 
 
 def parse_input(input_string):
@@ -130,8 +132,40 @@ print(f"solution: {solution}\n")
 
 print("-----------------------------\nPART 2")
 
+def is_exit_condition_met(grid, n=8):
+    for row in grid:
+        consecutive_count = 0
+        for cell in row:
+            if cell == 'X':
+                consecutive_count += 1
+                if consecutive_count >= n:
+                    return True
+            else:
+                consecutive_count = 0
+    return False
 
 
+robots = parse_input(file_content)
+
+S = (103, 101)
+N = 1
+
+while True:
+    grid = create_matrix(S[0], S[1], '.')
+    print(f"> Trying {N}")
+    for robot in robots:
+        final_position = calculate_final_position(robot["p"], robot["v"], S, N)
+
+        if grid[final_position[0]][final_position[1]] == '.':
+            grid[final_position[0]][final_position[1]] = 'X'
+
+    # Verifica la condizione di uscita
+    if is_exit_condition_met(grid):
+        print(f"\n\nSolution found at step {N}!")
+        print(matrix_to_string(grid))
+        break
+
+    N += 1
 
 print(f"\nSOLUTION --------------------\n")
 
