@@ -264,3 +264,18 @@ def is_obstacle_in_line_to_position(grid, start_pos, direction, target_pos):
     # Se esco dalla griglia prima di raggiungere il target, significa che non era sulla stessa linea direzionale.
     # Avendo già controllato l'allineamento, qui significa semplicemente che non c'è ostacolo lungo il percorso.
     return False
+
+
+def create_matrix(rows, cols, default_value=0):
+    """
+    Crea una matrice NxM con un valore di default.
+
+    Args:
+        rows (int): Numero di righe (N).
+        cols (int): Numero di colonne (M).
+        default_value (optional): Valore di default per ogni elemento. Default è 0.
+
+    Returns:
+        list of list: Matrice NxM.
+    """
+    return [[default_value for _ in range(cols)] for _ in range(rows)]
