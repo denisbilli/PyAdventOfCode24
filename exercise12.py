@@ -48,6 +48,7 @@ def get_matrix_dimensions(matrix):
     cols = len(matrix[0]) if matrix else 0  # Verifica che la matrice non sia vuota
     return rows, cols
 
+
 def is_position_inside(matrix, guard_position):
     """
     Verifica se la posizione indicata da guard_position è all'interno della matrice.
@@ -68,6 +69,7 @@ def is_position_inside(matrix, guard_position):
     row, col = guard_position
     return 0 <= row < rows and 0 <= col < cols
 
+
 def matrix_to_string(matrix):
     """
     Converte una matrice XY di caratteri in una stringa.
@@ -82,157 +84,6 @@ def matrix_to_string(matrix):
     return '\n'.join(''.join(row) for row in matrix)
 
 
-def follow_path_with_trails(grid, current_pos, initial_pos, solutions):
-    element = int(grid[current_pos[0]][current_pos[1]])
-    initial_element = int(grid[initial_pos[0]][initial_pos[1]])
-
-    # Se troviamo il valore 9, il percorso è completo
-    if element != initial_element and current_pos in solutions:
-        #print(f"> found solution starting at {initial_pos} and ending at {current_pos}")
-        solution = {"start": initial_pos[0], "trails": initial_pos[1:], "end": current_pos}
-        if not solutions.__contains__(solution):
-            return solutions.append(solution)
-
-    # Direzioni di movimento (sx, su, dx, giu)
-    directions = [
-        (0, -1),  # sinistra
-        (-1, 0),  # su
-        (0, 1),  # destra
-        (1, 0)  # giù
-    ]
-
-    for dr, dc in directions:
-        next_pos = (current_pos[0] + dr, current_pos[1] + dc)
-
-        # Verifica che la posizione successiva sia valida
-        if is_position_inside(grid, next_pos):
-            next_element = grid[next_pos[0]][next_pos[1]]
-            if next_element != '.':
-                next_element = int(next_element)
-                if next_element == element + 1:
-                    initial_pos.append(next_pos)
-                    # Segui il percorso ricorsivamente
-                    follow_path_with_trails(grid, next_pos, initial_pos, solutions)
-
-    return solutions
-
-
-# def find_adjacent_groups(coordinates):
-#     """
-#     Trova gruppi di coordinate adiacenti in una lista.
-#
-#     Args:
-#         coordinates (list of tuple): Lista di coordinate (x, y).
-#
-#     Returns:
-#         list of list of tuple: Lista di gruppi di coordinate adiacenti.
-#     """
-#     def are_adjacent(coord1, coord2):
-#         """Verifica se due coordinate sono adiacenti."""
-#         x1, y1 = coord1
-#         x2, y2 = coord2
-#         return abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1
-#
-#     groups = []
-#     visited = set()
-#
-#     for coord in coordinates:
-#         if coord not in visited:
-#             # Nuovo gruppo
-#             group = []
-#             to_visit = [coord]
-#
-#             while to_visit:
-#                 current = to_visit.pop()
-#                 if current not in visited:
-#                     visited.add(current)
-#                     group.append(current)
-#                     # Aggiungi coordinate adiacenti non ancora visitate
-#                     to_visit.extend(
-#                         [neighbor for neighbor in coordinates if neighbor not in visited and are_adjacent(current, neighbor)]
-#                     )
-#
-#             groups.append(group)
-#
-#     return groups
-#
-#
-# def find_adjacent_groups_with_names(coordinates):
-#     """
-#     Trova gruppi di coordinate adiacenti in una lista e garantisce che ogni duplicato venga trattato separatamente.
-#
-#     Args:
-#         coordinates (list of tuple): Lista di coordinate (x, y).
-#
-#     Returns:
-#         list of list of tuple: Lista di gruppi di coordinate adiacenti.
-#     """
-#     def are_adjacent(coord1, coord2):
-#         """Verifica se due coordinate sono adiacenti."""
-#         x1, y1 = coord1
-#         x2, y2 = coord2
-#         return abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1
-#
-#     groups = []
-#     visited = set()
-#     coordinate_counter = {}
-#
-#     for coord in coordinates:
-#         # Gestione delle coordinate duplicate
-#         if coord in coordinate_counter:
-#             coordinate_counter[coord] += 1
-#             coord = (coord[0], coord[1], coordinate_counter[coord])  # Rende unica la coordinata
-#         else:
-#             coordinate_counter[coord] = 1
-#
-#         if coord not in visited:
-#             # Nuovo gruppo
-#             group = []
-#             to_visit = [coord]
-#
-#             while to_visit:
-#                 current = to_visit.pop()
-#                 if current not in visited:
-#                     visited.add(current)
-#                     group.append((current[0], current[1]))  # Ignora il conteggio aggiunto
-#                     # Aggiungi coordinate adiacenti non ancora visitate
-#                     to_visit.extend(
-#                         [neighbor for neighbor in coordinates if neighbor not in visited and are_adjacent(current, neighbor)]
-#                     )
-#
-#             groups.append(group)
-#
-#     return groups
-#
-#
-# def calculate_perimeter(group):
-#     """
-#     Calcola il perimetro di un gruppo di elementi adiacenti.
-#
-#     Args:
-#         group (list of tuple): Lista di coordinate (x, y) adiacenti.
-#
-#     Returns:
-#         int: Il perimetro del gruppo.
-#     """
-#     def is_edge(coord, neighbors):
-#         """Verifica se una data coordinata ha un lato esposto."""
-#         x, y = coord
-#         # Controlla le 4 direzioni
-#         adjacent_positions = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-#         return sum(1 for pos in adjacent_positions if pos not in neighbors)
-#
-#     # Converti il gruppo in un set per velocizzare le operazioni
-#     neighbor_set = set(group)
-#     perimeter = 0
-#
-#     for coord in group:
-#         # Conta i lati esposti per ogni elemento
-#         perimeter += is_edge(coord, neighbor_set)
-#
-#     return perimeter
-
-
 print("-----------------------------\nPART 1")
 
 file_path = f"./inputs/12/input.txt"
@@ -241,34 +92,6 @@ file_content = read_file_to_string(file_path)
 grid = string_to_matrix(file_content)
 rows, cols = get_matrix_dimensions(grid)
 
-# elements = {}
-#
-# for row in range(rows):
-#     for col in range(cols):
-#         element = grid[row][col]
-#         if not elements.keys().__contains__(element):
-#             elements[element] = [(row,col)]
-#         else:
-#             elements[element].append((row,col))
-#
-# #print(elements)
-#
-# for element in elements:
-#     list = elements[element]
-#     sublists = find_adjacent_groups_with_names(list)
-#
-#     elements[element] = sublists
-#
-# total_price = 0
-# for element in elements:
-#     for sublist in elements[element]:
-#         area = len(sublist)
-#         perimeter = calculate_perimeter(sublist)
-#         price = area * perimeter
-#         print(f"element: {element} area: {area} perimeter: {perimeter} price: {price}")
-#         total_price += price
-
-#print(elements)
 
 def calculate_perimeter(group, grid):
     """
@@ -295,6 +118,7 @@ def calculate_perimeter(group, grid):
                 perimeter += 1
 
     return perimeter
+
 
 def find_adjacent_groups(grid):
     """
@@ -355,6 +179,97 @@ print(f"solution: {total_price}\n")
 
 print("-----------------------------\nPART 2")
 
+
+def calculate_perimeter_from_corners(group, grid):
+    """
+    Calcola il perimetro di un gruppo basandosi sui cambi di direzione (angoli).
+
+    Args:
+        group (list of tuple): Lista di coordinate del gruppo corrente.
+        grid (list of list): Griglia di riferimento.
+
+    Returns:
+        int: Numero totale di spigoli (angoli) del gruppo.
+    """
+    rows, cols = len(grid), len(grid[0])
+    perimeter_corners = 0
+
+    # Trova il bordo del gruppo
+    def is_border(x, y):
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nx, ny = x + dx, y + dy
+            if not (0 <= nx < rows and 0 <= ny < cols) or grid[nx][ny] == ".":
+                return True
+        return False
+
+    # Ordina le coordinate del gruppo in modo che il percorso sia sequenziale
+    def find_border_path(start):
+        path = []
+        visited = set()
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]  # Su, destra, giù, sinistra
+
+        def next_direction(x, y, prev_direction):
+            for i, (dx, dy) in enumerate(directions):
+                nx, ny = x + dx, y + dy
+                if (nx, ny) not in visited and (nx, ny) in border_points:
+                    return (nx, ny), (dx, dy)
+            return None, prev_direction
+
+        current = start
+        prev_direction = None
+        while current:
+            path.append(current)
+            visited.add(current)
+            current, prev_direction = next_direction(*current, prev_direction)
+
+        return path
+
+    # Trova tutti i punti di bordo
+    border_points = [point for point in group if is_border(*point)]
+
+    # Costruisce il percorso del bordo
+    if not border_points:
+        return 0
+
+    start_point = border_points[0]
+    border_path = find_border_path(start_point)
+
+    # Conta i cambi di direzione
+    prev_direction = None
+    for i in range(1, len(border_path)):
+        x1, y1 = border_path[i - 1]
+        x2, y2 = border_path[i]
+        direction = (x2 - x1, y2 - y1)
+
+        if prev_direction is not None and direction != prev_direction:
+            perimeter_corners += 1
+        prev_direction = direction
+
+    # Aggiungi 4 spigoli finali per chiudere il gruppo
+    return perimeter_corners + 4
+
+
+file_path = f"./inputs/12/test1.txt"
+file_content = read_file_to_string(file_path)
+
+grid = string_to_matrix(file_content)
+rows, cols = get_matrix_dimensions(grid)
+
+# Trova i gruppi adiacenti
+groups = find_adjacent_groups(grid)
+
+print(groups)
+total_price = 0
+
+# Calcola il perimetro per ogni gruppo
+print("Perimeters:")
+for element, group_list in groups.items():
+    for i, group in enumerate(group_list, start=1):
+        area = len(group_list[i-1])
+        perimeter = calculate_perimeter_from_corners(group, grid)
+        print(f"{element}_{i}: Perimeter = {perimeter} Area = {area} => Cost = {perimeter*area}")
+        total_price += perimeter*area
+
 print(f"\nSOLUTION --------------------\n")
 
-print(f"solution:\n")
+print(f"solution: {total_price}\n")

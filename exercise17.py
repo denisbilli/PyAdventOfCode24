@@ -84,6 +84,7 @@ class ThreeBitComputer:
                 self.registers['B'] ^= self.registers['C']
             elif opcode == 5:  # out
                 self.output.append(self.combo_value(operand) % 8)
+                #print(f"output: {self.output} : {self.registers["A"]}")
             elif opcode == 6:  # bdv
                 self.registers['B'] = self.registers['A'] // (2 ** self.combo_value(operand))
             elif opcode == 7:  # cdv
@@ -96,30 +97,6 @@ class ThreeBitComputer:
     def run(self, program):
         self.execute_instruction(program)
         return self.output
-
-
-# print("-----------------------------\nPART 1")
-#
-# file_path = f"./inputs/17/test1.txt"
-# file_content = read_file_to_string(file_path)
-#
-# initial_opcode = 0
-#
-# registers, program = parse_input(file_content)
-#
-# print(registers)
-# print(program)
-#
-# computer = ThreeBitComputer(registers)
-# output = computer.run(program)
-# print("Output:", output)
-#
-#
-# print(f"\nSOLUTION --------------------\n")
-#
-# print(f"solution: {','.join([str(item) for item in output])}\n")
-#
-# print("-----------------------------\nPART 2")
 
 
 def process_value(args):
@@ -140,24 +117,60 @@ def find_initial_value(program, max_idx=100000):
     return None
 
 
+def reconstruct_initial_a(output, base=8):
+    current_a = 0  # Partiamo da un valore neutrale
+    #13.7148
+
+    # output: [0]: A = 14680
+    # output: [0, 3]: A = 1835
+    # output: [0, 3, 5]: A = 229
+    # output: [0, 3, 5, 4]: A = 28
+    # output: [0, 3, 5, 4, 3]: A = 3
+    # output: [0, 3, 5, 4, 3, 0]: A = 0
+    # Output: [0, 3, 5, 4, 3, 0]
+    # A = 117440
+
+    # Risaliamo dall'ultimo valore dell'output al primo
+    for value in reversed(output):
+        current_a = value + current_a * base
+        print(current_a)
+
+    return current_a * base
+
+
 if __name__ == "__main__":
     file_path = f"./inputs/17/input.txt"
     file_content = read_file_to_string(file_path)
 
-    _, program = parse_input(file_content)
+    mode = 1
 
-    result = None
-    for i in range(0, 100):
-        min_val = i * 100000
-        max_val = min_val + 100000
-        print(f"trying range {min_val} => {max_val}")
-        result = find_initial_value(program, max_idx=max_val)
+    if mode == 0:
+        registers, program = parse_input(file_content)
 
-        if result:
-            break
+        print(registers)
+        print(program)
 
-    print(f"Valore trovato: {result}")
+        computer = ThreeBitComputer(registers)
+        output = computer.run(program)
+        print("Output:", output)
+    else:
+        _, program = parse_input(file_content)
 
-# print(f"\nSOLUTION --------------------\n")
-#
-# print(f"solution: {result}\n")
+        # BRUTE FORCE
+        result = None
+        for i in range(130673376989968, 28265935272522504):
+            min_val = i
+            max_val = min_val + 100000
+            print(f"trying range {min_val} => {max_val}")
+            result = find_initial_value(program, max_idx=max_val)
+
+            if result:
+                break
+
+        #initial_a = reconstruct_initial_a(program)
+        #print(initial_a)
+        #print(f"Valore trovato: {int(initial_a)}")
+
+# 28265935272522504   too high
+# 130673376989968     too low
+# 130673376989968 => 130673376991338 tested

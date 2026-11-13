@@ -198,7 +198,7 @@ def move_contiguous_elements(grid, start_pos, direction):
     return moved_elements
 
 
-def is_obstacle_in_line_to_position(grid, start_pos, direction, target_pos):
+def is_obstacle_in_line_to_position(grid, start_pos, direction, target_pos, obstacles=None):
     """
     Verifica se, nella linea retta a partire da start_pos nella direzione indicata,
     c'è un ostacolo 'O' prima di raggiungere target_pos.
@@ -217,13 +217,17 @@ def is_obstacle_in_line_to_position(grid, start_pos, direction, target_pos):
         return False
     cols = len(grid[0])
 
+    if not obstacles:
+        obstacles = ['O']
+
     r_start, c_start = start_pos
     r_target, c_target = target_pos
 
     if r_target > rows-1 or c_target > cols-1 or r_target < 0 or c_target < 0:
         return True
-    if grid[r_target][c_target] == 'O':
-        return True
+    for obstacle in obstacles:
+        if grid[r_target][c_target] == obstacle:
+            return True
 
     # Determina delta r, c e controlla l'allineamento del target nella direzione scelta
     if direction == 'up':
